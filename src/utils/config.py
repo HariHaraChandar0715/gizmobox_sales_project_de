@@ -1,4 +1,5 @@
 from collections import defaultdict
+from pyspark.sql import SparkSession,DataFrame
 from pyspark.sql.functions import input_file_name,col
 
 catalog_root_path = '/Volumes/gizmobox/'
@@ -10,9 +11,13 @@ bronze_operational_root_path = '/Volumes/gizmobox/bronze/operational_data/'
 
 
 
-def get_consolidated_customer_file_paths(spark,landing_customer_root_path):
+def get_consolidated_customer_file_paths(
+    spark : SparkSession,
+    landing_customer_root_path : str
+) -> DataFrame:
 
-    consolidated_file_paths = defaultdict(list)
+    landing_customer_file_paths = defaultdict(list)
+    consolidated_file_paths = list()
 
     try:
         customer_df = spark.read.format('json').load(landing_customer_root_path)
@@ -22,16 +27,44 @@ def get_consolidated_customer_file_paths(spark,landing_customer_root_path):
         customer_file_counts = len(customer_file_paths)
 
         if customer_file_counts == 0:
+
             print('No new files in landing layer')
+            consolidated_file_paths = None
+            return consolidated_file_paths
+        
         else:
+
             for file_info in customer_file_paths:
                 path = file_info.path
-                year = path.split('/')[-1].split('_')[1]
-                consolidated_file_paths[year].append(path)
+                year = int(path.split('/')[-1].split('_')[1])
+                landing_customer_file_paths[year].append(path)
+
+
+        landing_customer_file_paths = dict(landing_customer_file_paths)
+        year_keys = list(landing_customer_file_paths.keys())
+
+        
+        for year_key in year_keys:
+
+            for file_path in landing_customer_file_paths[year_key]:
+                
+                path_buff = list()
+                path_buff.append(year_key)
+                
+                path_buff.append(file_path)
+                consolidated_file_paths.append(tuple(path_buff))
+
+        consolidated_file_paths = spark.createDataFrame(
+            consolidated_file_paths,
+            ['year','lnd_opt_cst_file_paths']
+        )
+
 
     except Exception as error:
         
         print(f'Error Occured : {error}')
-        consolidated_file_paths = 0
+        consolidated_file_paths = None
+
+    
 
     return consolidated_file_paths
