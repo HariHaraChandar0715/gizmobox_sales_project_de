@@ -2,11 +2,11 @@ from collections import defaultdict
 from pyspark.sql import SparkSession,DataFrame
 from pyspark.sql.functions import input_file_name,col
 
-catalog_root_path = '/Volumes/gizmobox/'
-landing_operational_root_path = '/Volumes/gizmobox/landing/operational_data/'
+catalog_root_path = '/Volumes/harib_gizmobox_sales/'
+landing_operational_root_path = '/Volumes/harib_gizmobox_sales/landing/operational_data/'
 
-landing_customer_root_path = '/Volumes/gizmobox/landing/operational_data/customers'
-bronze_operational_root_path = '/Volumes/gizmobox/bronze/operational_data/'
+landing_customer_root_path = '/Volumes/harib_gizmobox_sales/landing/operational_data/customers'
+bronze_operational_root_path = '/Volumes/harib_gizmobox_sales/bronze/operational_data/'
 
 
 
@@ -42,21 +42,24 @@ def get_consolidated_customer_file_paths(
 
         landing_customer_file_paths = dict(landing_customer_file_paths)
         year_keys = list(landing_customer_file_paths.keys())
-
-        
+        #print(landing_customer_file_paths)
+        print('loop execution starts')
         for year_key in year_keys:
+            print('outer loop starts')
 
             for file_path in landing_customer_file_paths[year_key]:
-                
+                month = 0
                 path_buff = list()
                 path_buff.append(year_key)
-                
+                temp_file_path = file_path
+                month = int(temp_file_path.split('/')[-1].split('.')[0].split('_')[2])
+                path_buff.append(month)
                 path_buff.append(file_path)
                 consolidated_file_paths.append(tuple(path_buff))
 
         consolidated_file_paths = spark.createDataFrame(
             consolidated_file_paths,
-            ['year','lnd_opt_cst_file_paths']
+            ['year','month','lnd_opt_cst_file_paths']
         )
 
 
