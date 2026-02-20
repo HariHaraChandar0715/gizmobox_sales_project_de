@@ -2,11 +2,11 @@ from collections import defaultdict
 from pyspark.sql import SparkSession,DataFrame
 from pyspark.sql.functions import input_file_name,col
 
-catalog_root_path = '/Volumes/harib_gizmobox_sales/'
-landing_operational_root_path = '/Volumes/harib_gizmobox_sales/landing/operational_data/'
+catalog_root_path = '/Volumes/gizmobox/'
+landing_operational_root_path = '/Volumes/gizmobox/landing/operational_data/'
 
-landing_customer_root_path = '/Volumes/harib_gizmobox_sales/landing/operational_data/customers'
-bronze_operational_root_path = '/Volumes/harib_gizmobox_sales/bronze/operational_data/'
+landing_customer_root_path = '/Volumes/gizmobox/landing/operational_data/customers'
+bronze_operational_root_path = '/Volumes/gizmobox/bronze/operational_data/'
 
 
 
